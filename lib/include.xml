@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<project>
+
+	<haxelib name="lime" />
+	
+	<haxelib name="json2object" />
+	<haxelib name="jasper" />
+	
+	<haxelib name="peote-view" />
+	<haxelib name="peote-text" />
+	<haxelib name="input2action" />
+	<haxelib name="peote-ui" />
+
+	<assets path="../assets" rename="assets" exclude="lime.svg" embed="false" />
+	
+</project>

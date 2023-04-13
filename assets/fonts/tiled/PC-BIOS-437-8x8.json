@@ -1,0 +1,21 @@
+{
+	"kerning": false,
+	
+	// default glyphstyle
+	"width" : 8,
+	"height": 8,
+	"color" : 0xffffffff,
+		
+	// (for all ranges)
+	"tiles": { "x": 32, "y": 8  }, // how the image is splitted into tiles
+	"line" : { "height":8, "base":8 }, // line metric
+
+	"ranges":[
+		{
+			"image": "PC-BIOS-437-8x8.png",
+			"slot" : { "width":256, "height":64 },
+			"range": { "min":0x00, "max":0xff }
+		}
+	]
+
+}
