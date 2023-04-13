@@ -135,7 +135,7 @@ class Toggle extends BaseInteractive
 			{
 				label.text = model.label_toggle_false;
 			}
-			label.updateStyle();
+			label.updateLayout();
 		}
 
 		on_change();
