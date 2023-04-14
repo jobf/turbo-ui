@@ -129,8 +129,27 @@ class TurboInterface extends Application
 		});
 
 		add_element({
-			label: "SMOOTH",
+			label: "SLIDE",
 			role: SLIDER(0.5),
+			interactions: {
+				on_change: interactive ->
+				{
+					var slider:Slider = cast interactive;
+					trace('SLIDER changed to ' + slider.percent);
+				},
+			}
+		});
+
+		add_element({
+			label: "STEP",
+			role: STEPPER([1, 2, 4, 8, 16], 2),
+			interactions: {
+				on_change: interactive ->
+				{
+					var stepper:Stepper = cast interactive;
+					trace('STEPPER changed to ' + stepper.index);
+				},
+			}
 		});
 	}
 }

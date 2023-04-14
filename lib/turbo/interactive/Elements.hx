@@ -41,9 +41,10 @@ class BaseInteractive
 			height: geometry.height - 4,
 			hAlign: determine_h_align(),
 			vAlign: determine_v_align(),
-		}, z_index_label, model.label, font_model.font, font_model.style.copy(), bg_label_style);
+		}, z_index_label, model.label, font_model.font, font_model.style.copy(),
+			bg_label_style);
 
-		if (model.role != LABEL && model.role.getName() != 'SLIDER')
+		if (model.role == BUTTON || model.role.getName() == 'TOGGLE')
 		{
 			bg_element.onPointerOver = on_pointer_over;
 			bg_element.onPointerOut = on_pointer_out;
@@ -57,6 +58,7 @@ class BaseInteractive
 		var default_align:HAlign = switch model.role
 		{
 			case SLIDER(percent): HAlign.LEFT;
+			case STEPPER(slots, index): HAlign.LEFT;
 			case _: HAlign.CENTER;
 		}
 
@@ -73,6 +75,7 @@ class BaseInteractive
 		return switch model.role
 		{
 			case SLIDER(percent): VAlign.TOP;
+			case STEPPER(slots, index): HAlign.LEFT;
 			case _: VAlign.CENTER;
 		}
 	}
@@ -123,11 +126,7 @@ class Toggle extends BaseInteractive
 	{
 		super(model, geometry, style_bg, font, colors);
 
-		is_toggled = switch model.role
-		{
-			case TOGGLE(enabled): enabled;
-			case _: false; // should never be this
-		};
+		is_toggled = Type.enumParameters(model.role)[0] == true;
 
 		color_change(colors.bg_idle, colors.fg_idle);
 	}
@@ -157,7 +156,6 @@ class Toggle extends BaseInteractive
 	{
 		super.on_pointer_down(element, e);
 		is_toggled = !is_toggled;
-
 	}
 
 	override function color_change(bg:Color, fg:Color)
@@ -168,10 +166,8 @@ class Toggle extends BaseInteractive
 	}
 }
 
-class Slider extends BaseInteractive
+abstract class BaseSlider extends BaseInteractive
 {
-	public var percent(default, set):Float;
-
 	public var slider_element(default, null):UISlider;
 
 	public function new(model:InteractiveModel, geometry:Rectangle, style_bg:BoxStyle, font:FontModel, colors:Colors)
@@ -195,26 +191,12 @@ class Slider extends BaseInteractive
 
 		slider_element = new UISlider(geometry.x, slider_y, geometry.width, slider_height, z_index_slider, slider_style);
 
-		slider_element.onChange = on_dragger_change;
+		slider_element.onChange = on_slider_change;
 		slider_element.onDraggerPointerOver = on_dragger_over;
 		slider_element.onDraggerPointerOut = on_dragger_out;
-
 		slider_element.onPointerOver = on_slider_over;
 		slider_element.onPointerOut = on_slider_out;
 		slider_element.onPointerUp = on_slider_down;
-	}
-
-	function set_percent(value:Float):Float
-	{
-		percent = value;
-		slider_element.setPercent(percent, false);
-		on_change();
-		return percent;
-	}
-
-	function on_dragger_change(element:UISlider, value:Float, percent:Float):Void
-	{
-		this.percent = percent;
 	}
 
 	function on_dragger_over(element:UISlider, e:PointerEvent):Void
@@ -229,6 +211,8 @@ class Slider extends BaseInteractive
 		element.updateStyle();
 	}
 
+	abstract function on_slider_change(element:UISlider, value:Float, percent:Float):Void;
+
 	function on_slider_over(element:UISlider, e:PointerEvent):Void
 	{
 		element.backgroundStyle.color = colors.bg_toggle_on;
@@ -241,15 +225,78 @@ class Slider extends BaseInteractive
 		element.updateStyle();
 	}
 
+	abstract function on_slider_down(element:UISlider, e:PointerEvent):Void;
+}
+
+class Slider extends BaseSlider
+{
+	public var percent(default, set):Float;
+
+	function set_percent(value:Float):Float
+	{
+		percent = value;
+		slider_element.setPercent(percent, false, false);
+		on_change();
+		return percent;
+	}
+
+	function on_slider_down(element:UISlider, e:PointerEvent):Void
+	{
+		// todo - fix drag position glitch
+
+		/*
+		var position = element.localX(e.x);
+		var total = element.width - element.backgroundSpace.left - element.backgroundSpace.right;
+		trace('position $position / total $total');
+		percent = position / total;
+		*/
+	}
+
+	function on_slider_change(element:UISlider, value:Float, percent:Float):Void
+	{
+		this.percent = percent;
+	}
+}
+
+// todo - CustomSlider implementation for better 'stepping'
+class Stepper extends BaseSlider
+{
+	public var index(default, set):Int;
+
+	var slots:Array<Float>;
+	var total_positions:Int;
+	var slot_size:Float;
+
+	public function new(model:InteractiveModel, geometry:Rectangle, style_bg:BoxStyle, font:FontModel, colors:Colors)
+	{
+		super(model, geometry, style_bg, font, colors);
+		var parameters = Type.enumParameters(model.role);
+		slots = parameters[0];
+		index = parameters[1];
+		total_positions = slots.length - 1;
+		slot_size = 1 / total_positions;
+	}
+
+	function set_index(value:Int):Int
+	{
+		index = value;
+		var percent = slot_size * index;
+		slider_element.setPercent(percent, false, false);
+		on_change();
+		return index;
+	}
+
+	function on_slider_change(element:UISlider, value:Float, percent:Float):Void
+	{
+		index = Std.int(slots.length * percent);
+	}
+
 	function on_slider_down(element:UISlider, e:PointerEvent):Void
 	{
 		var position = element.localX(e.x);
-		var total = element.width;// - element.backgroundSpace.left - element.backgroundSpace.right;
+		var total = element.width; // - element.backgroundSpace.left - element.backgroundSpace.right;
+		var percent = position / total;
+		index = Std.int(slots.length * percent);
 		trace('position $position / total $total');
-		
-		// todo - fix drag position glitch
-		/*
-		element.percent = position / total;
-		*/
 	}
 }

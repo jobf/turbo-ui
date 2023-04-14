@@ -51,6 +51,12 @@ class UI
 					slider.percent = percent;
 					slider;
 				};
+			case STEPPER(slots, index):{
+					var stepper = new Stepper(model, geometry, style_bg, font_model, colors);
+					display.add(stepper.slider_element);
+					stepper.index = index;
+					stepper;
+			}
 			case _: new BaseInteractive(model, geometry, style_bg, font_model, colors);
 		}
 
@@ -65,6 +71,7 @@ enum InteractiveRole
 	LABEL;
 	TOGGLE(is_toggled:Bool);
 	SLIDER(percent:Float);
+	STEPPER(slots:Array<Float>, index:Int);
 }
 
 enum Align
