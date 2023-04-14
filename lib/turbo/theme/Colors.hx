@@ -6,7 +6,8 @@ import peote.view.Color;
 class Colors
 {
 	public var bg_display:Color = 0x101010ff;
-	public var bg_toggle_off:Color = 0x101010ff;
+	public var bg_toggle_off:Color;
+	public var bg_toggle_on:Color;
 
 	public var bg_idle:Color;
 	public var fg_idle:Color;
@@ -26,6 +27,8 @@ class Themes
 	public static function RAY_CHERRY():Colors
 	{
 		return {
+			bg_toggle_on: 0x5b1e20ff,
+			bg_toggle_off: 0x3a1720ff,
 			bg_idle: 0x753233ff,
 			fg_idle: 0xe17373ff,
 			bg_hover: 0xe06262ff,

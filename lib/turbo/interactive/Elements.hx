@@ -15,45 +15,56 @@ class BaseInteractive
 {
 	var model:InteractiveModel;
 	var colors:Colors;
-	var element_bg:UIElement;
+	var bg_element:UIElement;
+	var bg_style:BoxStyle;
+	var bg_label_style:BoxStyle;
+
 	var geometry:Rectangle;
 	var label:UITextLine<FontStyleTiled>;
-	var is_pointer_hover:Bool;
 
-	public function new(model:InteractiveModel, geometry:Rectangle, style_bg:Style, font:FontModel, colors:Colors)
+	public function new(model:InteractiveModel, geometry:Rectangle, style_bg:BoxStyle, font_model:FontModel, colors:Colors)
 	{
 		this.model = model;
 		this.colors = colors;
 		this.geometry = geometry;
-		is_pointer_hover = false;
-		var z_index_bg = -100;
+
+		var z_index_bg = -1000;
+		bg_style = style_bg.copy();
+
+		bg_element = new UIElement(geometry.x, geometry.y, geometry.width, geometry.height, z_index_bg, bg_style);
+
 		var z_index_label = -10;
+		bg_label_style = bg_style.copy();
 
-		element_bg = new UIElement(geometry.x, geometry.y, geometry.width, geometry.height, -z_index_bg, style_bg);
-
-		label = new UITextLine<FontStyleTiled>(geometry.x, geometry.y, {
-			width: geometry.width,
-			height: geometry.height,
+		label = new UITextLine<FontStyleTiled>(geometry.x + 2, geometry.y + 2, {
+			width: geometry.width - 4,
+			height: geometry.height - 4,
 			hAlign: determine_h_align(),
 			vAlign: determine_v_align(),
-		}, z_index_label, model.label, font.font, font.style);
+		}, z_index_label, model.label, font_model.font, font_model.style.copy(), bg_label_style);
 
-		if (model.role != LABEL)
+		if (model.role != LABEL && model.role.getName() != 'SLIDER')
 		{
-			element_bg.onPointerOver = on_pointer_over;
-			element_bg.onPointerOut = on_pointer_out;
-			element_bg.onPointerDown = on_pointer_down;
-			element_bg.onPointerUp = on_pointer_up;
+			bg_element.onPointerOver = on_pointer_over;
+			bg_element.onPointerOut = on_pointer_out;
+			bg_element.onPointerDown = on_pointer_down;
+			bg_element.onPointerUp = on_pointer_up;
 		}
 	}
 
 	function determine_h_align():HAlign
 	{
+		var default_align:HAlign = switch model.role
+		{
+			case SLIDER(percent): HAlign.LEFT;
+			case _: HAlign.CENTER;
+		}
+
 		return switch model.label_text_align_override
 		{
 			case LEFT: HAlign.LEFT;
 			case RIGHT: HAlign.RIGHT;
-			case _: HAlign.CENTER;
+			case _: default_align;
 		}
 	}
 
@@ -61,38 +72,38 @@ class BaseInteractive
 	{
 		return switch model.role
 		{
-			case SLIDER(fraction): VAlign.TOP;
+			case SLIDER(percent): VAlign.TOP;
 			case _: VAlign.CENTER;
 		}
 	}
 
 	function color_change(bg:Color, fg:Color)
 	{
-		element_bg.style.color = bg;
-		element_bg.updateStyle();
+		bg_element.style.color = bg;
+		bg_element.updateStyle();
 		label.fontStyle.color = fg;
 		label.updateStyle();
 	}
 
-	function on_pointer_over(element:UIElement, e:PointerEvent):Void
+	function on_pointer_over(element:Interactive, e:PointerEvent):Void
 	{
 		color_change(colors.bg_hover, colors.fg_hover);
 		model.interactions.on_over(this);
 	}
 
-	function on_pointer_out(element:UIElement, e:PointerEvent):Void
+	function on_pointer_out(element:Interactive, e:PointerEvent):Void
 	{
 		color_change(colors.bg_idle, colors.fg_idle);
 		model.interactions.on_out(this);
 	}
 
-	function on_pointer_down(element:UIElement, e:PointerEvent):Void
+	function on_pointer_down(element:Interactive, e:PointerEvent):Void
 	{
 		color_change(colors.bg_pressed, colors.fg_pressed);
 		model.interactions.on_press(this);
 	}
 
-	function on_pointer_up(element:UIElement, e:PointerEvent):Void
+	function on_pointer_up(element:Interactive, e:PointerEvent):Void
 	{
 		color_change(colors.bg_hover, colors.fg_hover);
 		model.interactions.on_release(this);
@@ -108,7 +119,7 @@ class Toggle extends BaseInteractive
 {
 	public var is_toggled(default, set):Bool;
 
-	public function new(model:InteractiveModel, geometry:Rectangle, style_bg:Style, font:FontModel, colors:Colors)
+	public function new(model:InteractiveModel, geometry:Rectangle, style_bg:BoxStyle, font:FontModel, colors:Colors)
 	{
 		super(model, geometry, style_bg, font, colors);
 
@@ -137,27 +148,108 @@ class Toggle extends BaseInteractive
 			}
 			label.updateLayout();
 		}
-
 		on_change();
 
 		return is_toggled;
 	}
 
-	override function on_pointer_down(element:UIElement, e:PointerEvent):Void
+	override function on_pointer_down(element:Interactive, e:PointerEvent):Void
 	{
-		is_toggled = !is_toggled;
 		super.on_pointer_down(element, e);
+		is_toggled = !is_toggled;
+
 	}
 
 	override function color_change(bg:Color, fg:Color)
 	{
-		if (is_toggled)
-		{
-			super.color_change(bg, fg);
-		}
-		else
-		{
-			super.color_change(colors.bg_toggle_off, fg);
-		}
+		label.backgroundStyle.color = is_toggled ? colors.bg_toggle_on : colors.bg_toggle_off;
+		fg = is_toggled ? colors.fg_idle : colors.bg_idle;
+		super.color_change(bg, fg);
+	}
+}
+
+class Slider extends BaseInteractive
+{
+	public var percent(default, set):Float;
+
+	public var slider_element(default, null):UISlider;
+
+	public function new(model:InteractiveModel, geometry:Rectangle, style_bg:BoxStyle, font:FontModel, colors:Colors)
+	{
+		super(model, geometry, style_bg, font, colors);
+
+		var slider_style:SliderStyle = {
+			backgroundStyle: style_bg.copy(colors.bg_toggle_off),
+			draggerStyle: style_bg.copy(colors.fg_idle),
+			draggerSize: 16,
+			draggSpace: 2,
+			backgroundSpace: {
+				left: 2,
+				right: 2,
+			},
+		};
+
+		var z_index_slider = 100;
+		var slider_height = 16;
+		var slider_y = Std.int(geometry.y + ((geometry.height / 2) - (slider_height / 2)));
+
+		slider_element = new UISlider(geometry.x, slider_y, geometry.width, slider_height, z_index_slider, slider_style);
+
+		slider_element.onChange = on_dragger_change;
+		slider_element.onDraggerPointerOver = on_dragger_over;
+		slider_element.onDraggerPointerOut = on_dragger_out;
+
+		slider_element.onPointerOver = on_slider_over;
+		slider_element.onPointerOut = on_slider_out;
+		slider_element.onPointerUp = on_slider_down;
+	}
+
+	function set_percent(value:Float):Float
+	{
+		percent = value;
+		slider_element.setPercent(percent, false);
+		on_change();
+		return percent;
+	}
+
+	function on_dragger_change(element:UISlider, value:Float, percent:Float):Void
+	{
+		this.percent = percent;
+	}
+
+	function on_dragger_over(element:UISlider, e:PointerEvent):Void
+	{
+		element.draggerStyle.color = colors.fg_hover;
+		element.updateStyle();
+	}
+
+	function on_dragger_out(element:UISlider, e:PointerEvent):Void
+	{
+		element.draggerStyle.color = colors.fg_idle;
+		element.updateStyle();
+	}
+
+	function on_slider_over(element:UISlider, e:PointerEvent):Void
+	{
+		element.backgroundStyle.color = colors.bg_toggle_on;
+		element.updateStyle();
+	}
+
+	function on_slider_out(element:UISlider, e:PointerEvent):Void
+	{
+		element.backgroundStyle.color = colors.bg_toggle_off;
+		element.updateStyle();
+	}
+
+	function on_slider_down(element:UISlider, e:PointerEvent):Void
+	{
+		var position = element.localX(e.x);
+		var total = element.width;// - element.backgroundSpace.left - element.backgroundSpace.right;
+		trace('position $position / total $total');
+		
+		// todo - fix drag position glitch
+		/*
+		element.percent = position / total;
+		*/
 	}
 }

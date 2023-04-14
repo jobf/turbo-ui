@@ -45,11 +45,16 @@ class UI
 		var interactive:BaseInteractive = switch model.role
 		{
 			case TOGGLE(is_toggled): new Toggle(model, geometry, style_bg, font_model, colors);
-			// case SLIDER(fraction):
+			case SLIDER(percent): {
+					var slider = new Slider(model, geometry, style_bg, font_model, colors);
+					display.add(slider.slider_element);
+					slider.percent = percent;
+					slider;
+				};
 			case _: new BaseInteractive(model, geometry, style_bg, font_model, colors);
 		}
 
-		display.add(interactive.element_bg);
+		display.add(interactive.bg_element);
 		display.add(interactive.label);
 	}
 }
@@ -59,7 +64,7 @@ enum InteractiveRole
 	BUTTON;
 	LABEL;
 	TOGGLE(is_toggled:Bool);
-	SLIDER(fraction:Float);
+	SLIDER(percent:Float);
 }
 
 enum Align

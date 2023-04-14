@@ -46,8 +46,8 @@ class TurboInterface extends Application
 		var item_rect:Rectangle = {
 			x: 0,
 			y: 0,
-			width: 100,
-			height: 20
+			width: 200,
+			height: 50
 		}
 
 		var colors:Colors = Themes.RAY_CHERRY();
@@ -60,7 +60,7 @@ class TurboInterface extends Application
 
 		var x = 0;
 		var y = 0;
-		var space = 22;
+		var space = item_rect.height + 2;
 
 		var add_element = (model:InteractiveModel) ->
 		{
@@ -126,6 +126,11 @@ class TurboInterface extends Application
 			label: "TOGGLE YES",
 			label_toggle_false: "TOGGLE NO",
 			role: TOGGLE(is_toggled),
+		});
+
+		add_element({
+			label: "SMOOTH",
+			role: SLIDER(0.5),
 		});
 	}
 }

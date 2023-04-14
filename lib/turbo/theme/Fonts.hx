@@ -16,7 +16,7 @@ class Fonts
 	{
 		var style = font.createFontStyle();
 
-		// todo - why is height and width not loaded from JSON ?
+		// todo - make own FontStyleTiled to set height and width there
 		style.width = 8;
 		style.height = 8;
 
