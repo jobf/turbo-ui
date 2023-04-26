@@ -1,3 +1,6 @@
+import turbo.interactive.Elements.Toggle;
+import turbo.interactive.Elements.BaseInteractive;
+import turbo.UI.Rectangle;
 import turbo.interactive.Elements;
 import turbo.theme.Fonts;
 import peote.ui.style.FontStyleTiled;
@@ -43,44 +46,31 @@ class TurboInterface extends Application
 			height: window.height - 40
 		}
 
-		var item_rect:Rectangle = {
+		var default_item_rect:Rectangle = {
 			x: 0,
 			y: 0,
 			width: 200,
 			height: 50
 		}
 
+		var item_rects:Map<String, Rectangle> = ["DEFAULT" => default_item_rect];
 		var colors:Colors = Themes.RAY_CHERRY();
 		var font_model:FontModel = Fonts.PC_BIOS_8x8(font);
 
-		ui = new UI(display_rect, item_rect, colors, font_model);
+		ui = new UI(display_rect, item_rects, colors, font_model);
 
 		peoteView.addDisplay(ui.display);
 		PeoteUIDisplay.registerEvents(window);
 
 		var x = 0;
 		var y = 0;
-		var space = item_rect.height + 2;
+		var space = default_item_rect.height + 2;
 
 		var add_element = (model:InteractiveModel) ->
 		{
 			ui.make(model, x, y);
 			y += space;
 		};
-
-		/*
-
-			{
-				label: label,
-				role: role,
-				label_text_align_override: label_text_align_override,
-				interactions: interactions,
-				label_change: label_change,
-				conditions: conditions,
-				sort_order: sort_order
-			}
-
-		 */
 
 		add_element({
 			label: "LABEL",
@@ -149,7 +139,47 @@ class TurboInterface extends Application
 					var stepper:Stepper = cast interactive;
 					trace('STEPPER changed to ' + stepper.index);
 				},
+			},
+			geometry_offset: {
+				y: 10,
+				width: 0,
+				height: 0
 			}
 		});
+
+		var x = 300;
+		var y = 0;
+
+		var on_toggle_item_change:BaseInteractive->Void = interactive ->
+		{
+			var toggle:Toggle = cast interactive;
+			@:privateAccess
+			var label = toggle.model.label;
+			trace('$label : ${toggle.is_toggled}');
+		}
+
+		var group = ui.make_toggle_group([
+			{
+				label: "A",
+				role: TOGGLE(true),
+				interactions: {
+					on_change: on_toggle_item_change
+				}
+			},
+			{
+				label: "B",
+				role: TOGGLE(false),
+				interactions: {
+					on_change: on_toggle_item_change
+				}
+			},
+			{
+				label: "C",
+				role: TOGGLE(false),
+				interactions: {
+					on_change: on_toggle_item_change
+				}
+			},
+		], x, y);
 	}
 }

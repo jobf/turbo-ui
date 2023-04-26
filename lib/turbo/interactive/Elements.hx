@@ -11,6 +11,7 @@ import peote.ui.event.*;
 import peote.ui.util.*;
 
 @:allow(turbo.UI)
+@:allow(turbo.interactive.Elements)
 class BaseInteractive
 {
 	var model:InteractiveModel;
@@ -30,6 +31,8 @@ class BaseInteractive
 
 		var z_index_bg = -1000;
 		bg_style = style_bg.copy();
+
+		var geometry = Rectangle.combine(geometry, model.geometry_offset);
 
 		bg_element = new UIElement(geometry.x, geometry.y, geometry.width, geometry.height, z_index_bg, bg_style);
 
@@ -148,14 +151,14 @@ class Toggle extends BaseInteractive
 			label.updateLayout();
 		}
 		on_change();
-
+		
 		return is_toggled;
 	}
 
 	override function on_pointer_down(element:Interactive, e:PointerEvent):Void
 	{
-		super.on_pointer_down(element, e);
 		is_toggled = !is_toggled;
+		super.on_pointer_down(element, e);
 	}
 
 	override function color_change(bg:Color, fg:Color)
@@ -176,7 +179,7 @@ abstract class BaseSlider extends BaseInteractive
 
 		var slider_style:SliderStyle = {
 			backgroundStyle: style_bg.copy(colors.bg_toggle_off),
-			draggerStyle: style_bg.copy(colors.fg_idle),
+			draggerStyle: style_bg.copy(colors.fg_hover),
 			draggerSize: 16,
 			draggSpace: 2,
 			backgroundSpace: {
@@ -194,6 +197,8 @@ abstract class BaseSlider extends BaseInteractive
 		slider_element.onChange = on_slider_change;
 		slider_element.onDraggerPointerOver = on_dragger_over;
 		slider_element.onDraggerPointerOut = on_dragger_out;
+		slider_element.onDraggerPointerDown = on_dragger_down;
+		slider_element.onDraggerPointerUp = on_dragger_up;
 		slider_element.onPointerOver = on_slider_over;
 		slider_element.onPointerOut = on_slider_out;
 		slider_element.onPointerUp = on_slider_down;
@@ -201,13 +206,25 @@ abstract class BaseSlider extends BaseInteractive
 
 	function on_dragger_over(element:UISlider, e:PointerEvent):Void
 	{
-		element.draggerStyle.color = colors.fg_hover;
+		element.draggerStyle.color = colors.fg_pressed;
 		element.updateStyle();
 	}
 
 	function on_dragger_out(element:UISlider, e:PointerEvent):Void
 	{
-		element.draggerStyle.color = colors.fg_idle;
+		element.draggerStyle.color = colors.fg_hover;
+		element.updateStyle();
+	}
+
+	function on_dragger_down(element:UISlider, e:PointerEvent):Void
+	{
+		element.draggerStyle.color = colors.bg_hover;
+		element.updateStyle();
+	}
+
+	function on_dragger_up(element:UISlider, e:PointerEvent):Void
+	{
+		element.draggerStyle.color = colors.fg_hover;
 		element.updateStyle();
 	}
 
@@ -245,11 +262,11 @@ class Slider extends BaseSlider
 		// todo - fix drag position glitch
 
 		/*
-		var position = element.localX(e.x);
-		var total = element.width - element.backgroundSpace.left - element.backgroundSpace.right;
-		trace('position $position / total $total');
-		percent = position / total;
-		*/
+			var position = element.localX(e.x);
+			var total = element.width - element.backgroundSpace.left - element.backgroundSpace.right;
+			trace('position $position / total $total');
+			percent = position / total;
+		 */
 	}
 
 	function on_slider_change(element:UISlider, value:Float, percent:Float):Void
@@ -298,5 +315,31 @@ class Stepper extends BaseSlider
 		var percent = position / total;
 		index = Std.int(slots.length * percent);
 		trace('position $position / total $total');
+	}
+}
+
+class ToggleGroup
+{
+	var group:Array<Toggle>;
+
+	public function new(group:Array<Toggle>)
+	{
+		for(toggle in group){
+			toggle.model.interactions.on_press = interactive -> reset_group(cast interactive);
+		}
+		this.group = group;
+	}
+
+	function reset_group(element_changed:Toggle)
+	{
+		for (element in group)
+		{
+			if (element != element_changed)
+			{
+				element.is_toggled = false;
+
+				element.color_change(element.colors.bg_idle, element.colors.fg_idle);
+			}
+		}
 	}
 }
