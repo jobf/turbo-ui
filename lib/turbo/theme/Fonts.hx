@@ -1,24 +1,32 @@
 package turbo.theme;
 
-import peote.ui.style.FontStyleTiled;
+import peote.view.Color;
 import peote.text.Font;
+import peote.ui.style.interfaces.FontStyle;
+
+@:structInit
+class FontStyleRetro implements FontStyle
+{
+	public var color:Color = Color.WHITE;
+	public var bgColor:Color = 0x00000000;
+	public var width:Float = 8.0;
+	public var height:Float = 8.0;
+	public var tilt:Float = 0.0;
+	public var letterSpace:Float = 0.0;
+}
 
 @:structInit
 class FontModel
 {
-	public var font:Font<FontStyleTiled>;
-	public var style:FontStyleTiled;
+	public var font:Font<FontStyleRetro>;
+	public var style:FontStyleRetro;
 }
 
 class Fonts
 {
-	public static function PC_BIOS_8x8(font:Font<FontStyleTiled>):FontModel
+	public static function PC_BIOS_8x8(font:Font<FontStyleRetro>):FontModel
 	{
 		var style = font.createFontStyle();
-
-		// todo - make own FontStyleTiled to set height and width there
-		style.width = 8;
-		style.height = 8;
 
 		return {
 			style: style,

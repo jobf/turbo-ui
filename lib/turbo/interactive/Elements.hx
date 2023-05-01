@@ -4,11 +4,17 @@ import turbo.UI;
 import turbo.theme.Colors;
 import turbo.theme.Fonts;
 import peote.view.Color;
-import peote.ui.style.interfaces.*;
-import peote.ui.style.*;
-import peote.ui.interactive.*;
-import peote.ui.event.*;
-import peote.ui.util.*;
+import peote.ui.style.interfaces.FontStyle;
+import peote.ui.interactive.UIElement;
+import peote.ui.interactive.UITextLine;
+import peote.ui.interactive.UISlider;
+import peote.ui.style.BoxStyle;
+import peote.ui.config.HAlign;
+import peote.ui.config.VAlign;
+import peote.ui.config.TextConfig;
+import peote.ui.config.SliderConfig;
+import peote.ui.event.PointerEvent;
+import peote.ui.interactive.Interactive;
 
 @:allow(turbo.UI)
 @:allow(turbo.interactive.Elements)
@@ -21,7 +27,7 @@ class BaseInteractive
 	var bg_label_style:BoxStyle;
 
 	var geometry:Rectangle;
-	var label:UITextLine<FontStyleTiled>;
+	var label:UITextLine<FontStyleRetro>;
 
 	public function new(model:InteractiveModel, geometry:Rectangle, style_bg:BoxStyle, font_model:FontModel, colors:Colors)
 	{
@@ -39,13 +45,22 @@ class BaseInteractive
 		var z_index_label = -10;
 		bg_label_style = bg_style.copy();
 
-		label = new UITextLine<FontStyleTiled>(geometry.x + 2, geometry.y + 2, {
-			width: geometry.width - 4,
-			height: geometry.height - 4,
+		var config:TextConfig = {
 			hAlign: determine_h_align(),
 			vAlign: determine_v_align(),
-		}, z_index_label, model.label, font_model.font, font_model.style.copy(),
-			bg_label_style);
+			backgroundStyle: bg_label_style,
+		}
+
+		label = new UITextLine<FontStyleRetro>(
+			geometry.x + 2, // x
+			geometry.y + 2, // y
+			geometry.width - 4, // width
+			geometry.height - 4, // height
+			z_index_label,
+			model.label,
+			font_model.font,
+			font_model.style.copy(),
+			config);
 
 		if (model.role == BUTTON || model.role.getName() == 'TOGGLE')
 		{
@@ -151,7 +166,7 @@ class Toggle extends BaseInteractive
 			label.updateLayout();
 		}
 		on_change();
-		
+
 		return is_toggled;
 	}
 
@@ -177,7 +192,7 @@ abstract class BaseSlider extends BaseInteractive
 	{
 		super(model, geometry, style_bg, font, colors);
 
-		var slider_style:SliderStyle = {
+		var config:SliderConfig = {
 			backgroundStyle: style_bg.copy(colors.bg_toggle_off),
 			draggerStyle: style_bg.copy(colors.fg_hover),
 			draggerSize: 16,
@@ -186,13 +201,19 @@ abstract class BaseSlider extends BaseInteractive
 				left: 2,
 				right: 2,
 			},
-		};
+		}
 
 		var z_index_slider = 100;
 		var slider_height = 16;
 		var slider_y = Std.int(geometry.y + ((geometry.height / 2) - (slider_height / 2)));
 
-		slider_element = new UISlider(geometry.x, slider_y, geometry.width, slider_height, z_index_slider, slider_style);
+		slider_element = new UISlider(
+			geometry.x, 
+			slider_y, 
+			geometry.width, 
+			slider_height, 
+			z_index_slider, 
+			config);
 
 		slider_element.onChange = on_slider_change;
 		slider_element.onDraggerPointerOver = on_dragger_over;
@@ -324,7 +345,8 @@ class ToggleGroup
 
 	public function new(group:Array<Toggle>)
 	{
-		for(toggle in group){
+		for (toggle in group)
+		{
 			toggle.model.interactions.on_press = interactive -> reset_group(cast interactive);
 		}
 		this.group = group;

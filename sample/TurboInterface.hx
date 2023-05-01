@@ -3,7 +3,6 @@ import turbo.interactive.Elements.BaseInteractive;
 import turbo.UI.Rectangle;
 import turbo.interactive.Elements;
 import turbo.theme.Fonts;
-import peote.ui.style.FontStyleTiled;
 import peote.text.Font;
 import peote.ui.PeoteUIDisplay;
 import peote.view.PeoteView;
@@ -25,7 +24,7 @@ class TurboInterface extends Application
 			case WEBGL, OPENGL, OPENGLES:
 				try
 				{
-					new Font<FontStyleTiled>("assets/fonts/tiled/PC-BIOS-437-8x8.json").load(start_sample);
+					new Font<FontStyleRetro>("assets/fonts/tiled/PC-BIOS-437-8x8.json").load(start_sample);
 				} catch (_)
 				{
 					trace(CallStack.toString(CallStack.exceptionStack()), _);
@@ -35,7 +34,7 @@ class TurboInterface extends Application
 		}
 	}
 
-	public function start_sample(font:Font<FontStyleTiled>)
+	public function start_sample(font:Font<FontStyleRetro>)
 	{
 		peoteView = new PeoteView(window);
 
