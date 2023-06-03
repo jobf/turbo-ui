@@ -11,13 +11,14 @@
 	<!--<define name="stats" if="html5" />-->
 	
 	<!--<window fps="60" width="800" height="600" vsync="true" resizable="true" hardware="true" allow-shaders="true" require-shaders="true" depth-buffer="true" stencil-buffer="false" /> -->
-	<window width="800" height="600" fps="61" />
-	<window width="0" height="0" fps="61" if="html5||android" />
+	<window width="800" height="600" fps="60" vsync="true"  />
 	<window if="html5" allowHighDPI="false" />
 
 	<haxelib name="turbo" path="../lib" />
 	
 	<define name="peoteui_maxDisplays" value="10" /> <!-- for optimization use "1" (max is 32) -->
+
+	<haxedef name="no_deprecation_warnings" />
 
 	<!-- to disable masking of ui-elements for more performance -->
 	<!--<haxedef name="peoteui_no_masking" />-->

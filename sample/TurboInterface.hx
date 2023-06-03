@@ -19,6 +19,14 @@ class TurboInterface extends Application
 
 	override function onWindowCreate():Void
 	{
+		#if html5
+		// see https://github.com/openfl/lime/pull/1692
+		@:privateAccess
+		var html5Window:lime._internal.backend.html5.HTML5Window = window.__backend;
+		@:privateAccess
+		html5Window.resizeElement = true;
+		#end
+		
 		switch (window.context.type)
 		{
 			case WEBGL, OPENGL, OPENGLES:
