@@ -62,7 +62,7 @@ class TurboInterface extends Application
 
 		var item_rects:Map<String, Rectangle> = ["DEFAULT" => default_item_rect];
 		var colors:Colors = Themes.RAY_CHERRY();
-		var font_model:FontModel = Fonts.PC_BIOS_8x8(font);
+		var font_model:FontModel = Fonts.PC_BIOS_8x14(font);
 
 		ui = new UI(display_rect, item_rects, colors, font_model);
 

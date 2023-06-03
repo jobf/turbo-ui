@@ -19,17 +19,24 @@ class FontStyleRetro implements FontStyle
 class FontModel
 {
 	public var font:Font<FontStyleRetro>;
-	public var style:FontStyleRetro;
+	public var style:FontStyleRetro = {};
 }
 
 class Fonts
 {
 	public static function PC_BIOS_8x8(font:Font<FontStyleRetro>):FontModel
 	{
-		var style = font.createFontStyle();
-
 		return {
-			style: style,
+			font: font
+		}
+	}
+
+	public static function PC_BIOS_8x14(font:Font<FontStyleRetro>):FontModel
+	{
+		return {
+			style: {
+				height: 14,
+			},
 			font: font
 		}
 	}
