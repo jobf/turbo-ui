@@ -1,0 +1,10 @@
+-cp lib
+
+--library json2object
+--library jasper
+--library peote-view
+--library peote-text
+--library input2action
+--library peote-ui
+
+--hl bin/main.hl
