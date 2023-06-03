@@ -61,7 +61,7 @@ class BaseInteractive
 			font_model.font,
 			font_model.style.copy(),
 			config);
-
+			
 		if (model.role == BUTTON || model.role.getName() == 'TOGGLE')
 		{
 			bg_element.onPointerOver = on_pointer_over;
@@ -194,7 +194,7 @@ abstract class BaseSlider extends BaseInteractive
 
 		var config:SliderConfig = {
 			backgroundStyle: style_bg.copy(colors.bg_toggle_off),
-			draggerStyle: style_bg.copy(colors.fg_hover),
+			draggerStyle: style_bg.copy(colors.dragger_idle),
 			draggerSize: 16,
 			draggSpace: 2,
 			backgroundSpace: {
@@ -220,32 +220,33 @@ abstract class BaseSlider extends BaseInteractive
 		slider_element.onDraggerPointerOut = on_dragger_out;
 		slider_element.onDraggerPointerDown = on_dragger_down;
 		slider_element.onDraggerPointerUp = on_dragger_up;
-		slider_element.onPointerOver = on_slider_over;
-		slider_element.onPointerOut = on_slider_out;
-		slider_element.onPointerUp = on_slider_down;
+		// todo - slider track click
+		// slider_element.onPointerOver = on_slider_over;
+		// slider_element.onPointerOut = on_slider_out;
+		// slider_element.onPointerUp = on_slider_down;
 	}
 
 	function on_dragger_over(element:UISlider, e:PointerEvent):Void
 	{
-		element.draggerStyle.color = colors.fg_pressed;
+		element.draggerStyle.color = colors.dragger_hover;
 		element.updateStyle();
 	}
 
 	function on_dragger_out(element:UISlider, e:PointerEvent):Void
 	{
-		element.draggerStyle.color = colors.fg_hover;
+		element.draggerStyle.color = colors.dragger_idle;
 		element.updateStyle();
 	}
 
 	function on_dragger_down(element:UISlider, e:PointerEvent):Void
 	{
-		element.draggerStyle.color = colors.bg_hover;
+		element.draggerStyle.color = colors.dragger_pressed;
 		element.updateStyle();
 	}
 
 	function on_dragger_up(element:UISlider, e:PointerEvent):Void
 	{
-		element.draggerStyle.color = colors.fg_hover;
+		element.draggerStyle.color = colors.dragger_hover;
 		element.updateStyle();
 	}
 
