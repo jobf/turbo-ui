@@ -1,0 +1,9 @@
+--class-path ../src
+
+--library utest
+
+--main RunTests
+
+--interp
+
+-D no-deprecation-warnings

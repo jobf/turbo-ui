@@ -26,13 +26,13 @@ class TurboInterface extends Application
 		@:privateAccess
 		html5Window.resizeElement = true;
 		#end
-		
+
 		switch (window.context.type)
 		{
 			case WEBGL, OPENGL, OPENGLES:
 				try
 				{
-					new Font<FontStyleRetro>("assets/fonts/tiled/PC-BIOS-437-8x8.json").load(start_sample);
+					new Font<FontStyleRetro>("assets/fonts/tiled/PC-BIOS-437-8x14.json").load(start_sample);
 				} catch (_)
 				{
 					trace(CallStack.toString(CallStack.exceptionStack()), _);
@@ -188,5 +188,31 @@ class TurboInterface extends Application
 				}
 			},
 		], x, y);
+		
+		var auto = new AutoUi(ui);
+		var c:Config = {}
+		auto.build(c);
 	}
+}
+
+class AutoUi{
+	var ui:UI;
+	public function new(ui:UI) {
+		this.ui = ui;
+	}
+
+	public function build(obj:Dynamic){
+		var fields = Reflect.fields(obj);
+		for (s in fields) {
+			var field = Reflect.field(obj, s);
+			trace(field);
+		}
+	}
+}
+
+
+@:structInit
+class Config {
+	public var numeric:Int= 0;
+	public var ratio:Float = 1.0;
 }
