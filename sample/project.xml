@@ -71,6 +71,7 @@
 	
 	<!-- for html5 and loading inside onPreloadComplete-event the assets need to be embed=true --> 
 	<!-- <assets path="assets" rename="assets" exclude="lime.svg" embed="false" /> -->
+	<assets path="../assets" rename="assets" embed="true" />
 	
 	<icon path="assets/lime.svg" />
 	

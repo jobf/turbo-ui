@@ -17,22 +17,26 @@ class TurboThreadTest extends Application
 	var ticker:Ticker;
 
 
-	override function onWindowCreate():Void
-	{
-		#if html5
-		// see https://github.com/openfl/lime/pull/1692
-		@:privateAccess
-		var html5Window:lime._internal.backend.html5.HTML5Window = window.__backend;
-		@:privateAccess
-		html5Window.resizeElement = true;
-		#end
+	// override function onWindowCreate():Void
+	// {
+	// 	#if html5
+	// 	// see https://github.com/openfl/lime/pull/1692
+	// 	@:privateAccess
+	// 	var html5Window:lime._internal.backend.html5.HTML5Window = window.__backend;
+	// 	@:privateAccess
+	// 	html5Window.resizeElement = true;
+	// 	#end
 
+		
+	// }
+
+	override function onPreloadComplete() {
 		switch (window.context.type)
 		{
 			case WEBGL, OPENGL, OPENGLES:
 				try
 				{
-					new Font<FontStyleRetro>("assets/fonts/tiled/PC-BIOS-437-8x14.json").load(start_sample);
+					start_sample();
 				} catch (_)
 				{
 					trace(CallStack.toString(CallStack.exceptionStack()), _);
@@ -42,8 +46,16 @@ class TurboThreadTest extends Application
 		}
 	}
 
-	public function start_sample(font:Font<FontStyleRetro>)
+
+	public function start_sample()
 	{
+		var font:FontModel = {
+			glyph_width: 8,
+			glyph_height: 14, 
+			glyph_asset_path: "assets/fonts/tiled/PC-BIOS-437-8x14.png",
+			// glyph_asset_path: "assets/PC-BIOS-437-8x14.png",
+		}
+
 		peoteView = new PeoteView(window);
 
 		var display_rect:Rectangle = {
@@ -62,9 +74,8 @@ class TurboThreadTest extends Application
 
 		var item_rects:Map<String, Rectangle> = ["DEFAULT" => default_item_rect];
 		var colors:Colors = Themes.RAY_CHERRY();
-		var font_model:FontModel = Fonts.PC_BIOS_8x14(font);
 
-		ui = new UI(display_rect, item_rects, colors, font_model);
+		ui = new UI(display_rect, item_rects, colors, font);
 
 		peoteView.addDisplay(ui.display);
 		PeoteUIDisplay.registerEvents(window);

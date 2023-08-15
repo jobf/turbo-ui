@@ -16,6 +16,7 @@ class UI
 	var font_model:FontModel;
 	var style_bg:BoxStyle;
 	final default_rect_key = "DEFAULT";
+	var glyphs:Glyphs;
 
 	public function new(display_rect:Rectangle, item_rects:Map<String, Rectangle>, colors:Colors, font_model:FontModel)
 	{
@@ -23,19 +24,20 @@ class UI
 			throw 'ERROR! item_rects must contain entry for $default_rect_key key';
 		}
 
+		this.glyphs = new Glyphs(font_model);
 		this.display_rect = display_rect;
 		this.item_rects = item_rects;
 
 		this.colors = colors;
 
-		font_model.style.color = colors.fg_idle;
 		this.font_model = font_model;
 
 		style_bg = {
 			color: colors.bg_idle,
 		}
 
-		display = new PeoteUIDisplay(display_rect.x, display_rect.y, display_rect.width, display_rect.height, colors.bg_display, [style_bg, font_model.style]);
+		display = new PeoteUIDisplay(display_rect.x, display_rect.y, display_rect.width, display_rect.height, colors.bg_display, [style_bg]);
+		display.addProgram(glyphs.program);
 	}
 
 	public function make(model:InteractiveModel, x:Int, y:Int):BaseInteractive
@@ -50,26 +52,28 @@ class UI
 			height: rect.height
 		}
 
+		var label = glyphs.make_line(x + 2, y + 2, model.label, colors.fg_idle);
+
 		var interactive:BaseInteractive = switch model.role
 		{
-			case TOGGLE(is_toggled): new Toggle(model, geometry, style_bg, font_model, colors);
+			case TOGGLE(is_toggled): new Toggle(model, geometry, style_bg, label, colors);
 			case SLIDER(percent): {
-					var slider = new Slider(model, geometry, style_bg, font_model, colors);
+					var slider = new Slider(model, geometry, style_bg, label, colors);
 					display.add(slider.slider_element);
 					slider.percent = percent;
 					slider;
 				};
 			case STEPPER(slots, index): {
-					var stepper = new Stepper(model, geometry, style_bg, font_model, colors);
+					var stepper = new Stepper(model, geometry, style_bg, label, colors);
 					display.add(stepper.slider_element);
 					stepper.index = index;
 					stepper;
 				}
-			case _: new BaseInteractive(model, geometry, style_bg, font_model, colors);
+			case _: new BaseInteractive(model, geometry, style_bg, label, colors);
 		}
 
 		display.add(interactive.bg_element);
-		display.add(interactive.label);
+		// display.add(interactive.label);
 
 		return interactive;
 	}

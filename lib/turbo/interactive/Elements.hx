@@ -1,5 +1,6 @@
 package turbo.interactive;
 
+import turbo.Glyphs;
 import turbo.UI;
 import turbo.theme.Colors;
 import turbo.theme.Fonts;
@@ -27,9 +28,9 @@ class BaseInteractive
 	var bg_label_style:BoxStyle;
 
 	var geometry:Rectangle;
-	var label:UITextLine<FontStyleRetro>;
+	var label:GlyphLine;
 
-	public function new(model:InteractiveModel, geometry:Rectangle, style_bg:BoxStyle, font_model:FontModel, colors:Colors)
+	public function new(model:InteractiveModel, geometry:Rectangle, style_bg:BoxStyle, label:GlyphLine, colors:Colors)
 	{
 		this.model = model;
 		this.colors = colors;
@@ -51,16 +52,17 @@ class BaseInteractive
 			backgroundStyle: bg_label_style,
 		}
 
-		label = new UITextLine<FontStyleRetro>(
-			geometry.x + 2, // x
-			geometry.y + 2, // y
-			geometry.width - 4, // width
-			geometry.height - 4, // height
-			z_index_label,
-			model.label,
-			font_model.font,
-			font_model.style.copy(),
-			config);
+		this.label = label;
+		//  new Line<FontStyleRetro>(
+		// 	geometry.x + 2, // x
+		// 	geometry.y + 2, // y
+		// 	geometry.width - 4, // width
+		// 	geometry.height - 4, // height
+		// 	z_index_label,
+		// 	model.label,
+		// 	font_model.font,
+		// 	font_model.style.copy(),
+		// 	config);
 			
 		if (model.role == BUTTON || model.role.getName() == 'TOGGLE')
 		{
@@ -102,8 +104,8 @@ class BaseInteractive
 	{
 		bg_element.style.color = bg;
 		bg_element.updateStyle();
-		label.fontStyle.color = fg;
-		label.updateStyle();
+		// label.fontStyle.color = fg;
+		// label.updateStyle();
 	}
 
 	function on_pointer_over(element:Interactive, e:PointerEvent):Void
@@ -140,9 +142,9 @@ class Toggle extends BaseInteractive
 {
 	public var is_toggled(default, set):Bool;
 
-	public function new(model:InteractiveModel, geometry:Rectangle, style_bg:BoxStyle, font:FontModel, colors:Colors)
+	public function new(model:InteractiveModel, geometry:Rectangle, style_bg:BoxStyle, label:GlyphLine, colors:Colors)
 	{
-		super(model, geometry, style_bg, font, colors);
+		super(model, geometry, style_bg, label, colors);
 
 		is_toggled = Type.enumParameters(model.role)[0] == true;
 
@@ -157,13 +159,13 @@ class Toggle extends BaseInteractive
 		{
 			if (is_toggled)
 			{
-				label.text = model.label;
+				// label.text = model.label;
 			}
 			else
 			{
-				label.text = model.label_toggle_false;
+				// label.text = model.label_toggle_false;
 			}
-			label.updateLayout();
+			// label.updateLayout();
 		}
 		on_change();
 
@@ -178,7 +180,7 @@ class Toggle extends BaseInteractive
 
 	override function color_change(bg:Color, fg:Color)
 	{
-		label.backgroundStyle.color = is_toggled ? colors.bg_toggle_on : colors.bg_toggle_off;
+		// label.backgroundStyle.color = is_toggled ? colors.bg_toggle_on : colors.bg_toggle_off;
 		fg = is_toggled ? colors.fg_idle : colors.bg_idle;
 		super.color_change(bg, fg);
 	}
@@ -188,9 +190,9 @@ abstract class BaseSlider extends BaseInteractive
 {
 	public var slider_element(default, null):UISlider;
 
-	public function new(model:InteractiveModel, geometry:Rectangle, style_bg:BoxStyle, font:FontModel, colors:Colors)
+	public function new(model:InteractiveModel, geometry:Rectangle, style_bg:BoxStyle, label:GlyphLine, colors:Colors)
 	{
-		super(model, geometry, style_bg, font, colors);
+		super(model, geometry, style_bg, label, colors);
 
 		var config:SliderConfig = {
 			backgroundStyle: style_bg.copy(colors.bg_toggle_off),
@@ -306,9 +308,9 @@ class Stepper extends BaseSlider
 	var total_positions:Int;
 	var slot_size:Float;
 
-	public function new(model:InteractiveModel, geometry:Rectangle, style_bg:BoxStyle, font:FontModel, colors:Colors)
+	public function new(model:InteractiveModel, geometry:Rectangle, style_bg:BoxStyle, label:GlyphLine, colors:Colors)
 	{
-		super(model, geometry, style_bg, font, colors);
+		super(model, geometry, style_bg, label, colors);
 		var parameters = Type.enumParameters(model.role);
 		slots = parameters[0];
 		index = parameters[1];
